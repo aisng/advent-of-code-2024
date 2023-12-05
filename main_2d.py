@@ -11,18 +11,17 @@ engine_matrix = [list(engine_schematics[i:i + chunk_size]) for i in range(0, chu
 pprint(engine_matrix)
 
 numbers = []
-valid_numbers = []
 
-num_locations = []
-sym_locations = []
+# num_locations = []
+# sym_locations = []
 
-for i in range(len(engine_matrix)):
-    for j in range(len(engine_matrix[i])):
-        current_char = engine_matrix[i][j]
-        if current_char.isnumeric():
-            num_locations.append((i, j))
-        if current_char in symbols:
-            sym_locations.append((i, j))
+# for i in range(len(engine_matrix)):
+#     for j in range(len(engine_matrix[i])):
+#         current_char = engine_matrix[i][j]
+#         if current_char.isnumeric():
+#             num_locations.append((i, j))
+#         if current_char in symbols:
+#             sym_locations.append((i, j))
 
 
 # print("num locs", num_locations)
@@ -31,6 +30,9 @@ for i in range(len(engine_matrix)):
 adjacent_digits = []
 valid_numbers = []
 current_num = ""
+row_len = len(engine_matrix[0])
+col_len = len(engine_matrix)
+
 for i in range(len(engine_matrix)):
 
     for j in range(len(engine_matrix[i])):
@@ -49,79 +51,64 @@ for i in range(len(engine_matrix)):
             nw = engine_matrix[i-1][j-1]
 
             if n.isdigit():
-                print("n", n, "coord", (i-1, j))
-                adjacent_digits.append((i-1, j))
-                for elem in engine_matrix[i-1][j:len(engine_matrix[i-1])]:
+                if nw == ".":
+                    for elem in engine_matrix[i-1][j:row_len]:
+                        if elem.isdigit():
+                            current_num += elem
+                    valid_numbers.append(int(current_num))
+                current_num = ""
+
+            if ne.isdigit():
+                for elem in engine_matrix[i-1][j:row_len]:
                     if elem.isdigit():
                         current_num += elem
                 valid_numbers.append(int(current_num))
                 current_num = ""
 
-            elif ne.isdigit():
-                print("ne", ne, "coord", (i-1, j+1))
-                adjacent_digits.append((i-1, j+1))
-                for elem in engine_matrix[i-1][j+1:len(engine_matrix[i-1])]:
+            if e.isdigit():
+                for elem in engine_matrix[i][j+1:row_len]:
                     if elem.isdigit():
                         current_num += elem
                 valid_numbers.append(int(current_num))
                 current_num = ""
 
-            elif e.isdigit():
-                print("e", e, "coord", (i, j+1))
-                adjacent_digits.append((i, j+1))
-                for elem in engine_matrix[i][j+1:len(engine_matrix[i])]:
+            if se.isdigit():
+                for elem in engine_matrix[i+1][j+1:row_len]:
                     if elem.isdigit():
                         current_num += elem
                 valid_numbers.append(int(current_num))
                 current_num = ""
 
-            elif se.isdigit():
-                print("se", se, "coord", (i+1, j+1))
-                adjacent_digits.append((i+1, j+1))
-                for elem in engine_matrix[i+1][j+1:len(engine_matrix[i+1])]:
-                    if elem.isdigit():
-                        current_num += elem
-                valid_numbers.append(int(current_num))
-                current_num = ""
+            # if s.isdigit():
+            #
+            #     for elem in engine_matrix[i+1][j:row_len]:
+            #         if elem.isdigit():
+            #             current_num += elem
+            #     valid_numbers.append(int(current_num))
+            #     current_num = ""
 
-            elif s.isdigit():
-                print("s", s, "coord", (i+1, j))
-                adjacent_digits.append((i+1, j))
-                for elem in engine_matrix[i+1][j:len(engine_matrix[i+1])]:
-                    if elem.isdigit():
-                        current_num += elem
-                valid_numbers.append(int(current_num))
-                current_num = ""
-
-            # TODO: different direction so the slice is also different
-            elif sw.isdigit():
-                print("sw", sw, "coord", (i+1, j-1))
-                adjacent_digits.append((i+1, j-1))
+            if sw.isdigit():
                 # added +1 to range to include the found value
-                for elem in engine_matrix[i+1][0:len(engine_matrix[i+1]) - j-1 + 1]:
+                for elem in engine_matrix[i+1][0:j + 1]:
                     if elem.isdigit():
                         current_num += elem
                 valid_numbers.append(int(current_num))
                 current_num = ""
 
-            elif w.isdigit():
-                print("w", w, "coord", (i, j-1))
-                adjacent_digits.append((i, j-1))
-                for elem in engine_matrix[i][0:len(engine_matrix[i+1]) - j-1]:
+            if w.isdigit():
+                for elem in engine_matrix[i][0:len(engine_matrix[i]) - j-1]:
                     if elem.isdigit():
                         current_num += elem
                 valid_numbers.append(int(current_num))
                 current_num = ""
 
-            elif nw.isdigit():
-                print("nw", nw, "coord", (i-1, j-1))
-                adjacent_digits.append((i-1, j-1))
-                for elem in engine_matrix[i-1][0:len(engine_matrix[i+1]) - j-1]:
+            if nw.isdigit():
+                for elem in engine_matrix[i-1][0:j-1 + 1]:
                     if elem.isdigit():
                         current_num += elem
                 valid_numbers.append(int(current_num))
                 current_num = ""
 
 
-print("adj", adjacent_digits)
+# print("adj", adjacent_digits)
 print("valid", valid_numbers)
