@@ -159,23 +159,24 @@ Matrix = List[List[str]]
 
 def convert_data_to_matrix(data: str) -> Matrix:
     data_in_2d = []
+
     for line in data.splitlines():
         data_in_2d.append(list(line))
 
     return data_in_2d
 
 
-def is_symbol_adjacent(matrix: Matrix, x_coord: int, y_coord: int) -> bool:
+def is_symbol_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
     for x in (x_coord - 1, x_coord, x_coord + 1):
         for y in (y_coord - 1, y_coord, y_coord + 1):
 
-            if y not in range(len(matrix[0])) or x not in range(len(matrix)):
+            if y not in range(len(data[0])) or x not in range(len(data)):
                 continue
 
             if x == x_coord and y == y_coord:
                 continue
 
-            if not matrix[x][y].isdigit() and matrix[x][y] != ".":
+            if not data[x][y].isdigit() and data[x][y] != ".":
                 return True
     return False
 
@@ -231,63 +232,68 @@ def numbers_and_coordinates(data: Matrix) -> Iterator[Tuple[int, List]]:
                 current_num = ""
 
 
-def get_part_numbers_sum(data: Matrix) -> int:
-    result_sum = 0
+def calculate_part_numbers_sum(data: Matrix) -> int:
+    """AOC day 3, part 1. Find numbers that are adjacent to symbols and calculate their sum"""
+    result = 0
     for number, coordinates in numbers_and_coordinates(data):
         for x, y in coordinates:
             if is_symbol_adjacent(data, x_coord=x, y_coord=y):
-                result_sum += number
+                result += number
                 break
-    return result_sum
+    return result
 
 
-def get_gear_coordinates(data: Matrix) -> List:
+def get_gear_coordinates(data: Matrix) -> Tuple:
+    """Return coordinates of all the gear symbols within a matrix"""
     gear_symbol = "*"
-    gear_coordinates = []
     for x in range(len(data)):
         for y in range(len(data[x])):
             current_char = data[x][y]
             if current_char == gear_symbol:
-                gear_coordinates.append((x, y))
-                # yield x, y
-    return gear_coordinates
+                yield x, y
 
 
-# def get_gear_ratio_sum(matrix: Matrix) -> int:
-#     result = 0
-#     for number, coordinates in numbers_and_coordinates(matrix):
-#         for x, y in coordinates:
-#             if is_number_adjacent(matrix, x_coord=x, y_coord=y):
-#                 print(x, y)
-#                 break
-#     return result
+def calculate_gear_ratios_sum(matrix: Matrix) -> int:
+    """AOC day 3, part 2. Find the product of two numbers adjacent to asterisk (*) symbol and
+    calculate their sum """
+
+    result = 0
+    gear_coordinates = get_gear_coordinates(matrix)
+
+    for x, y in gear_coordinates:
+        current_adjacent_numbers = []
+        current_gear_ratio = 1
+
+        if not is_number_adjacent(matrix, x, y):
+            continue
+
+        adjacent_digits = get_adjacent_digit_coordinates(matrix, x, y)
+
+        for number, num_coordinates in numbers_and_coordinates(matrix):
+            for digit_coordinates in adjacent_digits:
+                if digit_coordinates in num_coordinates:
+                    current_adjacent_numbers.append(number)
+                    break
+
+            if len(current_adjacent_numbers) != 2:
+                continue
+
+            for num in current_adjacent_numbers:
+                current_gear_ratio *= num
+            result += current_gear_ratio
+            break
+
+    return result
 
 
 def main():
-    matrix = convert_data_to_matrix(engine_schematics)
-    # get_gear_ratio_sum(matrix)
-    # print(get_part_numbers_sum(matrix))
-
-    gear_coordinates = get_gear_coordinates(matrix)
-    # num_coordinates = numbers_and_coordinates(matrix)
-    gear_ratios = []
-    for x, y in gear_coordinates:
-        current_gear_ratio = 1
-        current_adjacent_numbers = []
-        if is_number_adjacent(matrix, x, y):
-            adjacent_digits = get_adjacent_digit_coordinates(matrix, x, y)
-            for digit_coordinates in adjacent_digits:
-                for number, num_coordinates in numbers_and_coordinates(matrix):
-                    if digit_coordinates in num_coordinates:
-                        current_adjacent_numbers.append(number)
-                        if len(current_adjacent_numbers) == 2:
-
-                            for num in current_adjacent_numbers:
-                                current_gear_ratio *= num
-                            gear_ratios.append(current_gear_ratio)
-                            break
-    print(sum(gear_ratios))
+    matrix = convert_data_to_matrix(engine_sch)
+    print(calculate_part_numbers_sum(matrix))
+    print(calculate_gear_ratios_sum(matrix))
+    print("part1 answ", 540212)
+    print("part2 answ", 87605697)
 
 
 if __name__ == "__main__":
+    # 87605697
     main()
