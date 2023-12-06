@@ -1,4 +1,3 @@
-import sys
 from typing import List, Iterator, Tuple
 
 engine_sch = """.........232.633.......................803..........................361................192............539.................973.221...340.....
@@ -158,6 +157,7 @@ Matrix = List[List[str]]
 
 
 def convert_data_to_matrix(data: str) -> Matrix:
+    """Convert the data to two dimensional matrix"""
     data_in_2d = []
 
     for line in data.splitlines():
@@ -194,7 +194,8 @@ def is_symbol_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
     return any(result)
 
 
-def is_number_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
+def is_digit_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
+    """Check if any digit is adjacent to the current coordinate"""
     adjacent_items = find_adjacent_values_and_coordinates(data, x_coord, y_coord)
     result = []
     for value, _ in adjacent_items:
@@ -203,7 +204,8 @@ def is_number_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
     # return any([x.isdigit() for x in find_adjacent_values(data, x_coord, y_coord)])
 
 
-def get_adjacent_digit_coordinates(data: Matrix, x_coord: int, y_coord: int) -> List:
+def get_adjacent_digit_coordinates(data: Matrix, x_coord: int, y_coord: int) -> List[Tuple[int, int]]:
+    """Get the coordinates of all adjacent digits"""
     result = []
     adjacent_items = find_adjacent_values_and_coordinates(data, x_coord, y_coord)
     for value, coordinates in adjacent_items:
@@ -213,6 +215,7 @@ def get_adjacent_digit_coordinates(data: Matrix, x_coord: int, y_coord: int) -> 
 
 
 def numbers_and_coordinates(data: Matrix) -> Iterator[Tuple[int, List]]:
+    """Find all the numbers and their coordinates within a matrix"""
     current_num = ""
     digit_coordinates = []
     for x_coord in range(len(data)):
@@ -264,7 +267,7 @@ def calculate_gear_ratios_sum(matrix: Matrix) -> int:
         current_adjacent_numbers = []
         current_gear_ratio = 1
 
-        if not is_number_adjacent(matrix, x, y):
+        if not is_digit_adjacent(matrix, x, y):
             continue
 
         adjacent_digits = get_adjacent_digit_coordinates(matrix, x, y)
@@ -290,8 +293,8 @@ def main():
     matrix = convert_data_to_matrix(engine_sch)
     print("p1", calculate_part_numbers_sum(matrix))
     print("p2", calculate_gear_ratios_sum(matrix))
-    # print("part1 answ", 540212)
-    # print("part2 answ", 87605697)
+    # print("part1", 540212)
+    # print("part2", 87605697)
 
 
 if __name__ == "__main__":
