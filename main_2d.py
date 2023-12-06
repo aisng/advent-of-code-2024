@@ -1,6 +1,5 @@
-from pprint import pprint
-from typing import List, Tuple
-from data import data
+import sys
+from typing import List, Iterator, Tuple
 
 engine_sch = """.........232.633.......................803..........................361................192............539.................973.221...340.....
 .............*..............#.....256.#.........329....................*313............*.......766.......*..........472..-...........+..249.
@@ -155,12 +154,10 @@ engine_schematics = """467..114..
 .664.598..
 """
 
+Matrix = List[List[str]]
 
-# todo: create func that converts str to 2d list
-#  find whole number and its coordinates
-#  for each coord check if symbol is adjacent
 
-def convert_data_to_matrix(data: str) -> List[List[str]]:
+def convert_data_to_matrix(data: str) -> Matrix:
     data_in_2d = []
     for line in data.splitlines():
         data_in_2d.append(list(line))
@@ -168,59 +165,53 @@ def convert_data_to_matrix(data: str) -> List[List[str]]:
     return data_in_2d
 
 
-def is_symbol_adjacent(matrix: List[List[str]], coordinates: Tuple[int, int]) -> bool:
-    i, j = coordinates
+def is_symbol_adjacent(matrix_: Matrix, x_coord: int, y_coord: int) -> bool:
+    for x in (x_coord - 1, x_coord, x_coord + 1):
+        for y in (y_coord - 1, y_coord, y_coord + 1):
 
-    for x in (i - 1, i, i + 1):
-        for y in (j - 1, j, j + 1):
-
-            if y not in range(len(matrix[0])) or x not in range(len(matrix)):
+            if y not in range(len(matrix_[0])) or x not in range(len(matrix_)):
                 continue
 
-            if x == i and y == j:
+            if x == x_coord and y == y_coord:
                 continue
 
-            if not matrix[x][y].isdigit() and matrix[x][y] != ".":
+            if not matrix_[x][y].isdigit() and matrix_[x][y] != ".":
                 return True
     return False
 
 
-def get_number(matrix: List[List[str]], coord_list: List) -> int:
-    num = ""
-    for i, j in coord_list:
-        num += matrix[i][j]
-    # print(num)
-    return int(num)
+def numbers_and_coordinates(data: Matrix) -> Iterator[Tuple[int, List]]:
+    current_num = ""
+    digit_coordinates = []
+    for x_coord in range(len(data)):
+        for y_coord in range(len(data[x_coord])):
+            current_char = data[x_coord][y_coord]
+
+            # if digit -> collect data
+            if current_char.isdigit():
+                current_num += current_char
+                digit_coordinates.append((x_coord, y_coord))
+                continue
+
+            # not digit -> check if digit was before -> if so return collected data
+            if current_num:
+                yield int(current_num), digit_coordinates
+                digit_coordinates = []
+                current_num = ""
 
 
-# TODO: change data
-matrix = convert_data_to_matrix(engine_sch)
-print(len(matrix), len(matrix[0]))
-num_coordinates = []
-current_num = ""
-digit_coordinates = []
+def main():
+    result_sum = 0
+    matrix = convert_data_to_matrix(engine_sch)
+    for number, coordinates in numbers_and_coordinates(matrix):
+        # print(number, coordinates)
+        for x, y in coordinates:
+            if is_symbol_adjacent(matrix, x_coord=x, y_coord=y):
+                result_sum += number
+                break
+    
+    print(result_sum)
 
-for i in range(len(matrix)):
-    for j in range(len(matrix[i])):
-        current_char = matrix[i][j]
-        if current_char.isdigit():
-            current_num += current_char
-            digit_coordinates.append((i, j))
-        if current_char == "." and current_num != "" and len(digit_coordinates) != 0:
-            num_coordinates.append(digit_coordinates)
-            digit_coordinates = []
-            current_num = ""
 
-valid_nums = []
-valid_num = 0
-
-for number in num_coordinates:
-    found = False
-    for node in number:
-        if is_symbol_adjacent(matrix, node):
-            found = True
-    if found:
-        valid_num = get_number(matrix, number)
-        valid_nums.append(valid_num)
-
-print(sum(valid_nums))
+if __name__ == "__main__":
+    main()
