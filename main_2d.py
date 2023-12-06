@@ -2,7 +2,7 @@ from pprint import pprint
 from typing import List, Tuple
 from data import data
 
-engine_sh = """.........232.633.......................803..........................361................192............539.................973.221...340.....
+engine_sch = """.........232.633.......................803..........................361................192............539.................973.221...340.....
 .............*..............#.....256.#.........329....................*313............*.......766.......*..........472..-...........+..249.
 670-..@.......181......814..865.........968......@.......605....128.............%......798.638...+....776...........*......%...........*....
 .......563........741....*..........&.....-...............*........*....815*....921...........*..............428.219..993.584...990.431.....
@@ -194,8 +194,7 @@ def get_number(matrix: List[List[str]], coord_list: List) -> int:
 
 
 # TODO: change data
-matrix = convert_data_to_matrix(engine_sh)
-# pprint(matrix)
+matrix = convert_data_to_matrix(engine_sch)
 print(len(matrix), len(matrix[0]))
 num_coordinates = []
 current_num = ""
@@ -225,42 +224,3 @@ for number in num_coordinates:
         valid_nums.append(valid_num)
 
 print(sum(valid_nums))
-
-# region OLD
-# def is_symbol_adjacent(matrix: List[List[str]], coordinates: Tuple[int, int]) -> bool:
-#     i, j = coordinates
-#
-#     for x in (i - 1, i, i + 1):
-#         for y in (j - 1, j, j + 1):
-#
-#             if y not in range(len(matrix[0])) or x not in range(len(matrix)):
-#                 continue
-#
-#             if x == i and y == j:
-#                 continue
-#
-#             if not matrix[x][y].isdigit() and matrix[x][y] != ".":
-#                 return True
-#     return False
-#
-#
-# # current_num = ""
-# valid_numbers = []
-# num_locations = []
-#
-# for i in range(len(engine_matrix)):
-#     current_num = ""
-#     for j in range(len(engine_matrix[i])):
-#         current_char = engine_matrix[i][j]
-#         if current_char.isdigit():
-#             # num_locations.append((i, j))
-#             current_num += current_char
-#             if is_symbol_adjacent(engine_matrix, (i, j)):
-#                 valid_numbers.append(current_num)
-#                 current_num = ""
-#
-# # print("adj", adjacent_digits)
-# print("valid", valid_numbers)
-# # print(num_locations)
-# # print(is_symbol_adjacent(engine_matrix, (1, 3)))
-# endregion
