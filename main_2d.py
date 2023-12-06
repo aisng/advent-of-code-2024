@@ -142,7 +142,7 @@ engine_sch = """.........232.633.......................803......................
 ...*............963....*.......761..............................................*...927.........*...................*.....*........45.......
 ....981................675.........676.............156.............30...........998............697......14..366....960...874..497........278"""
 
-engine_schematics = """467..114..
+sample_data = """467..114..
 ...*......
 ..35..633.
 ......#...
@@ -166,37 +166,9 @@ def convert_data_to_matrix(data: str) -> Matrix:
     return data_in_2d
 
 
-def is_symbol_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
-    for x in (x_coord - 1, x_coord, x_coord + 1):
-        for y in (y_coord - 1, y_coord, y_coord + 1):
-
-            if y not in range(len(data[0])) or x not in range(len(data)):
-                continue
-
-            if x == x_coord and y == y_coord:
-                continue
-
-            if not data[x][y].isdigit() and data[x][y] != ".":
-                return True
-    return False
-
-
-def is_number_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
-    for x in (x_coord - 1, x_coord, x_coord + 1):
-        for y in (y_coord - 1, y_coord, y_coord + 1):
-
-            if y not in range(len(data[0])) or x not in range(len(data)):
-                continue
-
-            if x == x_coord and y == y_coord:
-                continue
-
-            if data[x][y].isdigit():
-                return True
-    return False
-
-
-def get_adjacent_digit_coordinates(data: Matrix, x_coord: int, y_coord: int) -> List:
+# def
+def find_adjacent_values_and_coordinates(data: Matrix, x_coord: int, y_coord: int) -> List[Tuple[str, Tuple[int, int]]]:
+    """Get all values and their coordinates within a matrix adjacent to coordinates specified"""
     result = []
     for x in (x_coord - 1, x_coord, x_coord + 1):
         for y in (y_coord - 1, y_coord, y_coord + 1):
@@ -207,8 +179,36 @@ def get_adjacent_digit_coordinates(data: Matrix, x_coord: int, y_coord: int) -> 
             if x == x_coord and y == y_coord:
                 continue
 
-            if data[x][y].isdigit():
-                result.append((x, y))
+            result.append((data[x][y], (x, y)))
+    return result
+
+
+def is_symbol_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
+    """Check if any symbol is adjacent to the current coordinate"""
+    adjacent_items = find_adjacent_values_and_coordinates(data, x_coord, y_coord)
+    result = []
+    for value, _ in adjacent_items:
+        if not value.isdigit() and value != ".":
+            result.append(True)
+        result.append(False)
+    return any(result)
+
+
+def is_number_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
+    adjacent_items = find_adjacent_values_and_coordinates(data, x_coord, y_coord)
+    result = []
+    for value, _ in adjacent_items:
+        result.append(value.isdigit())
+    return any(result)
+    # return any([x.isdigit() for x in find_adjacent_values(data, x_coord, y_coord)])
+
+
+def get_adjacent_digit_coordinates(data: Matrix, x_coord: int, y_coord: int) -> List:
+    result = []
+    adjacent_items = find_adjacent_values_and_coordinates(data, x_coord, y_coord)
+    for value, coordinates in adjacent_items:
+        if value.isdigit():
+            result.append(coordinates)
     return result
 
 
@@ -232,6 +232,16 @@ def numbers_and_coordinates(data: Matrix) -> Iterator[Tuple[int, List]]:
                 current_num = ""
 
 
+def get_gear_coordinates(data: Matrix) -> Tuple:
+    """Return coordinates of all the gear symbols within a matrix"""
+    gear_symbol = "*"
+    for x in range(len(data)):
+        for y in range(len(data[x])):
+            current_char = data[x][y]
+            if current_char == gear_symbol:
+                yield x, y
+
+
 def calculate_part_numbers_sum(data: Matrix) -> int:
     """AOC day 3, part 1. Find numbers that are adjacent to symbols and calculate their sum"""
     result = 0
@@ -241,16 +251,6 @@ def calculate_part_numbers_sum(data: Matrix) -> int:
                 result += number
                 break
     return result
-
-
-def get_gear_coordinates(data: Matrix) -> Tuple:
-    """Return coordinates of all the gear symbols within a matrix"""
-    gear_symbol = "*"
-    for x in range(len(data)):
-        for y in range(len(data[x])):
-            current_char = data[x][y]
-            if current_char == gear_symbol:
-                yield x, y
 
 
 def calculate_gear_ratios_sum(matrix: Matrix) -> int:
@@ -288,12 +288,11 @@ def calculate_gear_ratios_sum(matrix: Matrix) -> int:
 
 def main():
     matrix = convert_data_to_matrix(engine_sch)
-    print(calculate_part_numbers_sum(matrix))
-    print(calculate_gear_ratios_sum(matrix))
-    print("part1 answ", 540212)
-    print("part2 answ", 87605697)
+    print("p1", calculate_part_numbers_sum(matrix))
+    print("p2", calculate_gear_ratios_sum(matrix))
+    # print("part1 answ", 540212)
+    # print("part2 answ", 87605697)
 
 
 if __name__ == "__main__":
-    # 87605697
     main()
