@@ -1,4 +1,4 @@
-from typing import List, Iterator, Tuple
+from typing import List, Iterator, Tuple, Callable
 
 engine_sch = """.........232.633.......................803..........................361................192............539.................973.221...340.....
 .............*..............#.....256.#.........329....................*313............*.......766.......*..........472..-...........+..249.
@@ -167,9 +167,10 @@ def convert_data_to_matrix(data: str) -> Matrix:
 
 
 # def
-def find_adjacent_values_and_coordinates(data: Matrix, x_coord: int, y_coord: int) -> List[Tuple[str, Tuple[int, int]]]:
+def find_adjacent_values_and_coordinates(data: Matrix, x_coord: int, y_coord: int) -> Iterator[
+    Tuple[str, Tuple[int, int]]]:
     """Get all values and their coordinates within a matrix adjacent to coordinates specified"""
-    result = []
+
     for x in (x_coord - 1, x_coord, x_coord + 1):
         for y in (y_coord - 1, y_coord, y_coord + 1):
 
@@ -179,36 +180,29 @@ def find_adjacent_values_and_coordinates(data: Matrix, x_coord: int, y_coord: in
             if x == x_coord and y == y_coord:
                 continue
 
-            result.append((data[x][y], (x, y)))
-    return result
+            yield data[x][y], (x, y)
 
 
-def is_symbol_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
+def is_symbol(item):
+    return not item.isdigit() and item != "."
+
+
+def is_digit(item):
+    return item.isdigit()
+
+
+def check_adjacent(data: Matrix, x_coord: int, y_coord: int, analyzer: Callable) -> bool:
     """Check if any symbol is adjacent to the current coordinate"""
-    adjacent_items = find_adjacent_values_and_coordinates(data, x_coord, y_coord)
-    result = []
-    for value, _ in adjacent_items:
-        if not value.isdigit() and value != ".":
-            result.append(True)
-        result.append(False)
-    return any(result)
-
-
-def is_digit_adjacent(data: Matrix, x_coord: int, y_coord: int) -> bool:
-    """Check if any digit is adjacent to the current coordinate"""
-    adjacent_items = find_adjacent_values_and_coordinates(data, x_coord, y_coord)
-    result = []
-    for value, _ in adjacent_items:
-        result.append(value.isdigit())
-    return any(result)
-    # return any([x.isdigit() for x in find_adjacent_values(data, x_coord, y_coord)])
+    for value, _ in find_adjacent_values_and_coordinates(data, x_coord, y_coord):
+        if analyzer(value):
+            return True
+    return False
 
 
 def get_adjacent_digit_coordinates(data: Matrix, x_coord: int, y_coord: int) -> List[Tuple[int, int]]:
     """Get the coordinates of all adjacent digits"""
     result = []
-    adjacent_items = find_adjacent_values_and_coordinates(data, x_coord, y_coord)
-    for value, coordinates in adjacent_items:
+    for value, coordinates in find_adjacent_values_and_coordinates(data, x_coord, y_coord):
         if value.isdigit():
             result.append(coordinates)
     return result
@@ -235,7 +229,7 @@ def numbers_and_coordinates(data: Matrix) -> Iterator[Tuple[int, List]]:
                 current_num = ""
 
 
-def get_gear_coordinates(data: Matrix) -> Tuple:
+def get_gear_coordinates(data: Matrix) -> Iterator[Tuple]:
     """Return coordinates of all the gear symbols within a matrix"""
     gear_symbol = "*"
     for x in range(len(data)):
@@ -250,7 +244,7 @@ def calculate_part_numbers_sum(data: Matrix) -> int:
     result = 0
     for number, coordinates in numbers_and_coordinates(data):
         for x, y in coordinates:
-            if is_symbol_adjacent(data, x_coord=x, y_coord=y):
+            if check_adjacent(data, x_coord=x, y_coord=y, analyzer=is_symbol):
                 result += number
                 break
     return result
@@ -267,7 +261,7 @@ def calculate_gear_ratios_sum(matrix: Matrix) -> int:
         current_adjacent_numbers = []
         current_gear_ratio = 1
 
-        if not is_digit_adjacent(matrix, x, y):
+        if not check_adjacent(matrix, x, y, is_digit):
             continue
 
         adjacent_digits = get_adjacent_digit_coordinates(matrix, x, y)
