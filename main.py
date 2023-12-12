@@ -1,8 +1,7 @@
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Iterable
 
-seeds = "79 14 55 13"
-
-sample_data = """seed-to-soil map:
+sample_data = """seeds: 79 14 55 13
+seed-to-soil map:
 50 98 2
 52 50 48
 
@@ -34,13 +33,13 @@ humidity-to-location map:
 60 56 37
 56 93 4"""
 
-maps = ("seed-to-soil"
-        "soil-to-fertilizer"
-        "fertilizer-to-water"
-        "water-to-light"
-        "light-to-temperature"
-        "temperature-to-humidity"
-        "humidity-to-location"
+maps = ("seed-to-soil",
+        "soil-to-fertilizer",
+        "fertilizer-to-water",
+        "water-to-light",
+        "light-to-temperature",
+        "temperature-to-humidity",
+        "humidity-to-location",
         )
 
 
@@ -65,53 +64,41 @@ def parse_mapping_data(data: str) -> Dict[str, List[List[int]]]:
 
     return result
 
-    # current_mapping_rules = []
-    # current_mapping_start_idx = data.index(mapping_type) + 1
-    # for line in data[current_mapping_start_idx:]:
-    #     if line:
-    #         current_mapping_rules.append(line)
-    #     else:
-    #         break
-    #
-    # print("cmr", current_mapping_rules)
 
-
-def convert_number(seed_number: int, rules: List[List[int]]) -> int:
-    print(rules)
+def convert_number(initial_number: int, rules: List[List[int]]) -> int:
     result = 0
-    source_ranges = []
-    destination_ranges = []
-    for rule in rules:
-        source_lower = rule[1]
-        source_upper = rule[1] + rule[2]
-        range_length = rule[2]
-        source_range = (source_lower, source_upper)
-        destination_lower = rule[0]
-        destination_upper = rule[0] + range_length
-        destination_range = (destination_lower, destination_upper)
-        # if seed_number in source_range:
-        #     result = destination_upper - range_length
-        source_ranges.append(source_range)
-        destination_ranges.append(destination_range)
-    # 79-50+52
-    print("src", source_ranges, )
-    print("dest", destination_ranges )
+
+    for destination, source, range_len in rules:
+        if initial_number in range(source, source + range_len):
+            result = initial_number + (destination - source)
+            return result
+        result = initial_number
 
     return result
 
 
-def get_seeds():
-    return []
+def parse_seeds(data: str) -> Iterable[int]:
+    for line in data.splitlines():
+        if line.startswith("seeds:"):
+            _, seeds = line.split(": ")
+            for seed in seeds.split(" "):
+                yield int(seed)
+
+
+def get_min_location_number(seeds: Iterable[int], rules: Dict[str, List[List[int]]]) -> int:
+    loc_values = []
+    for seed in seeds:
+        number = seed
+        for map_ in maps:
+            number = convert_number(initial_number=number, rules=rules.get(map_, []))
+        loc_values.append(number)
+    return min(loc_values)
 
 
 def main() -> None:
     rules = parse_mapping_data(sample_data)
-    print(convert_number(seed_number=79, rules=rules["seed-to-soil"]))
-    # for seed in get_seeds():
-    #     number = seed
-    #     for map_ in maps:
-    #         number = convert_number(number, rules.get(map_, []))
-    #     print(f"loc: {number}")  # todo store and get min loc
+    seeds = parse_seeds(data=sample_data)
+    print(get_min_location_number(seeds=seeds, rules=rules))
 
 
 if __name__ == "__main__":
