@@ -148,7 +148,28 @@ def mp_starter(seed_ranges: List[Tuple[int, int]], rules: Dict[str, List[List[in
         process.join()
 
 
-def convert_location_to_destination(loc_num: int, rules: List[List[int]]) -> int:
+def get_seed_number_from_location(seed_ranges: List[Tuple[int, int]],
+                                  rules: Dict[str, List[List[int]]]) -> int:
+    _, max_upper_bound = max(sorted(seed_ranges))
+
+    for num in range(max_upper_bound):
+        # print progress
+        if num % 1000000 == 0:
+            print(num / 1000000)
+
+        nex_min_src = num
+        for map_ in maps[::-1]:
+            nex_min_src = get_min_source_from_destination(nex_min_src, rules.get(map_, []))
+
+        for lower, upper in seed_ranges:
+            if nex_min_src not in range(lower, upper):
+                continue
+            else:
+                return num
+    return -1
+
+
+def get_min_source_from_destination(loc_num: int, rules: List[List[int]]) -> int:
     # result = 0
     for destination, source, range_len in rules:
         if loc_num in range(destination, destination + range_len):
@@ -162,28 +183,9 @@ def main() -> None:
     seeds = parse_seeds(data=task_input)
     seed_ranges = parse_seed_ranges_p2(seeds=seeds)
 
-    for num in range(1000000000):
-        if num % 1000000 == 0:
-            print(num/1000000)
-        nex_min_src = num
-        for map_ in maps[::-1]:
-            nex_min_src = convert_location_to_destination(nex_min_src, rules.get(map_, []))
-
-        for l, u in seed_ranges:
-            if nex_min_src not in range(l,u):
-                continue
-            else:
-                print(num)
-                raise SystemExit("aaa")
-
-        # for low, high in seed_ranges:
-        #     if nex_min_src not in range(low, high):
-        #         print("found seed", nex_min_src)
-        #         break
-
-    # print(min(potential_seeds))
+    print(get_seed_number_from_location(seed_ranges=seed_ranges, rules=rules))
 
 
 if __name__ == "__main__":
     main()
-    # p2 answer 56931769.
+    # p2 answer 56931769
