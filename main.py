@@ -89,18 +89,6 @@ def parse_seeds_p1(data: str) -> Iterable[int]:
                 yield int(seed)
 
 
-# not used in multithreading
-def get_seed_value_from_range_p2(seeds: Iterable[int]) -> Iterable[int]:
-    parsed_seeds = [seed for seed in seeds]
-    seed_range_lower_bound = parsed_seeds[::2]
-    seed_range_upper_bound = [sum(x) for x in zip(parsed_seeds[::2], parsed_seeds[1::2])]
-    seed_ranges = zip(seed_range_lower_bound, seed_range_upper_bound)
-    for lower_bound, upper_bound in seed_ranges:
-        print("lower bound", lower_bound, datetime.datetime.now())
-        for seed in range(lower_bound, upper_bound):
-            yield seed
-
-
 def parse_seed_ranges_p2(seeds: Iterable[int]) -> List[Tuple[int, int]]:
     parsed_seeds = [seed for seed in seeds]
     seed_range_lower_bound = parsed_seeds[::2]
@@ -127,18 +115,7 @@ def get_seed_value(seed_range: Tuple[int, int]) -> Iterable[int]:
         yield seed_val
 
 
-def get_min_location_number_p2(seeds: Iterable[int], rules: Dict[str, List[List[int]]]) -> int:
-    min_loc_val = None
-    for seed_num in get_seed_value_from_range_p2(seeds):
-        number = seed_num
-        for map_ in maps:
-            number = convert_number(initial_number=number, rules=rules.get(map_, []))
-        if min_loc_val is None or number < min_loc_val:
-            min_loc_val = number
-    return min_loc_val
-
-
-def get_min_location_number_mt_p2(seed_range: Tuple[int, int],
+def get_min_location_number_mp_p2(seed_range: Tuple[int, int],
                                   rules: Dict[str, List[List[int]]],
                                   ) -> int:
     start = datetime.datetime.now()
@@ -157,14 +134,11 @@ def get_min_location_number_mt_p2(seed_range: Tuple[int, int],
     return min_loc_val
 
 
-def main() -> None:
-    rules = parse_mapping_data(data=task_input)
-    seeds_p1 = parse_seeds_p1(data=task_input)
-    seed_ranges = parse_seed_ranges_p2(seeds=seeds_p1)
+def mp_starter(seed_ranges: List[Tuple[int, int]], rules: Dict[str, List[List[int]]]) -> None:
     processes = []
 
     for seed_range in seed_ranges:
-        process = Process(target=get_min_location_number_mt_p2, args=(seed_range, rules))
+        process = Process(target=get_min_location_number_mp_p2, args=(seed_range, rules))
         processes.append(process)
 
     for process in processes:
@@ -172,6 +146,12 @@ def main() -> None:
 
     for process in processes:
         process.join()
+
+
+def main() -> None:
+    rules = parse_mapping_data(data=task_input)
+    seeds_p1 = parse_seeds_p1(data=task_input)
+    seed_ranges = parse_seed_ranges_p2(seeds=seeds_p1)
 
 
 if __name__ == "__main__":
