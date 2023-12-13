@@ -1,8 +1,7 @@
 import datetime
-import threading
-import queue
 from typing import Dict, List, Iterable, Tuple
 from task_input import task_input
+from multiprocessing import Process
 
 sample_data = """seeds: 79 14 55 13
 seed-to-soil map:
@@ -108,10 +107,6 @@ def parse_seed_ranges_p2(seeds: Iterable[int]) -> List[Tuple[int, int]]:
     seed_range_upper_bound = [sum(x) for x in zip(parsed_seeds[::2], parsed_seeds[1::2])]
     seed_ranges = zip(seed_range_lower_bound, seed_range_upper_bound)
     return list(seed_ranges)
-    # for lower_bound, upper_bound in seed_ranges:
-    #     print("lower bound", lower_bound, datetime.datetime.now())
-    #     for seed in range(lower_bound, upper_bound):
-    #         yield seed
 
 
 def get_min_location_number(seeds: Iterable[int],
@@ -145,11 +140,10 @@ def get_min_location_number_p2(seeds: Iterable[int], rules: Dict[str, List[List[
 
 def get_min_location_number_mt_p2(seed_range: Tuple[int, int],
                                   rules: Dict[str, List[List[int]]],
-                                  queue_: queue.Queue) -> int:
+                                  ) -> int:
     start = datetime.datetime.now()
     print("start time", start)
     low, high = seed_range
-    # print("low", low, datetime.datetime.now())
     min_loc_val = None
     for seed_num in range(low, high):
         number = seed_num
@@ -157,7 +151,6 @@ def get_min_location_number_mt_p2(seed_range: Tuple[int, int],
             number = convert_number(initial_number=number, rules=rules.get(map_, []))
         if min_loc_val is None or number < min_loc_val:
             min_loc_val = number
-    queue_.put(min_loc_val)
     print(min_loc_val)
     end = datetime.datetime.now()
     print("duration", end - start)
@@ -168,30 +161,19 @@ def main() -> None:
     rules = parse_mapping_data(data=task_input)
     seeds_p1 = parse_seeds_p1(data=task_input)
     seed_ranges = parse_seed_ranges_p2(seeds=seeds_p1)
-    threads = []
-    thread_returns = []
-    queue_ = queue.Queue()
+    processes = []
 
     for seed_range in seed_ranges:
-        thread = threading.Thread(target=get_min_location_number_mt_p2, args=(seed_range, rules, queue_))
-        # return_val = queue_.get()
-        # thread_returns.append(return_val)
-        threads.append(thread)
+        process = Process(target=get_min_location_number_mt_p2, args=(seed_range, rules))
+        processes.append(process)
 
-    for thread in threads:
-        thread.start()
+    for process in processes:
+        process.start()
 
-    for thread in threads:
-        thread.join()
-
-    while not queue_.empty():
-        thread_returns.append(queue_.get())
-
-    if thread_returns:
-        print("thread returns", thread_returns)
-        print("result", min(thread_returns))
+    for process in processes:
+        process.join()
 
 
 if __name__ == "__main__":
     main()
-    # 4225564962 too high
+    # p2 answer 56931769
