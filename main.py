@@ -47,6 +47,7 @@ maps = ("seed-to-soil",
 
 
 def parse_mapping_data(data: str) -> Dict[str, List[List[int]]]:
+    """Part 1 and 2. Parse the mapping data from the puzzle input."""
     result = {}
     name = ""
     for line in data.splitlines():
@@ -68,20 +69,8 @@ def parse_mapping_data(data: str) -> Dict[str, List[List[int]]]:
     return result
 
 
-def convert_number(initial_number: int,
-                   rules: List[List[int]]) -> int:
-    result = 0
-
-    for destination, source, range_len in rules:
-        if initial_number in range(source, source + range_len):
-            result = initial_number + (destination - source)
-            return result
-        result = initial_number
-
-    return result
-
-
 def parse_seeds(data: str) -> Iterable[int]:
+    """Part 1 and 2. Parse the seed values from the input."""
     for line in data.splitlines():
         if line.startswith("seeds:"):
             _, seeds = line.split(": ")
@@ -90,6 +79,7 @@ def parse_seeds(data: str) -> Iterable[int]:
 
 
 def parse_seed_ranges_p2(seeds: Iterable[int]) -> List[Tuple[int, int]]:
+    """Part 2. Parse seed ranges from the input. """
     parsed_seeds = [seed for seed in seeds]
     seed_range_lower_bound = parsed_seeds[::2]
     seed_range_upper_bound = [sum(x) for x in zip(parsed_seeds[::2], parsed_seeds[1::2])]
@@ -97,8 +87,20 @@ def parse_seed_ranges_p2(seeds: Iterable[int]) -> List[Tuple[int, int]]:
     return list(seed_ranges)
 
 
+def convert_number(initial_number: int,
+                   rules: List[List[int]]) -> int:
+    """Part 1. Convert the seed/source number to a matching one in the next mapping"""
+
+    for destination, source, range_len in rules:
+        if initial_number in range(source, source + range_len):
+            return initial_number + (destination - source)
+
+    return initial_number
+
+
 def get_min_location_number(seeds: Iterable[int],
                             rules: Dict[str, List[List[int]]]) -> int:
+    """Part 1. Get the lowest location number for a seed"""
     loc_values = []
     for seed in seeds:
         number = seed
@@ -109,15 +111,10 @@ def get_min_location_number(seeds: Iterable[int],
     return min(loc_values)
 
 
-def get_seed_value(seed_range: Tuple[int, int]) -> Iterable[int]:
-    low, high = seed_range
-    for seed_val in range(low, high):
-        yield seed_val
-
-
 def get_min_location_number_mp_p2(seed_range: Tuple[int, int],
                                   rules: Dict[str, List[List[int]]],
                                   ) -> int:
+    """Part 2. Find the smallest location number with bruteforce. """
     start = datetime.datetime.now()
     print("start time", start)
     low, high = seed_range
@@ -134,25 +131,13 @@ def get_min_location_number_mp_p2(seed_range: Tuple[int, int],
     return min_loc_val
 
 
-def mp_starter(seed_ranges: List[Tuple[int, int]], rules: Dict[str, List[List[int]]]) -> None:
-    processes = []
-
-    for seed_range in seed_ranges:
-        process = Process(target=get_min_location_number_mp_p2, args=(seed_range, rules))
-        processes.append(process)
-
-    for process in processes:
-        process.start()
-
-    for process in processes:
-        process.join()
-
-
-def get_seed_number_from_location(seed_ranges: List[Tuple[int, int]],
-                                  rules: Dict[str, List[List[int]]]) -> int:
+def get_lowest_location_num_inverse(seed_ranges: List[Tuple[int, int]],
+                                    rules: Dict[str, List[List[int]]]) -> int:
+    """Part 2. Inverse method to find the lowest location number by checking if it's withing the seed ranges."""
     _, max_upper_bound = max(sorted(seed_ranges))
 
     for num in range(max_upper_bound):
+
         # print progress
         if num % 1000000 == 0:
             print(num / 1000000)
@@ -170,12 +155,26 @@ def get_seed_number_from_location(seed_ranges: List[Tuple[int, int]],
 
 
 def get_min_source_from_destination(loc_num: int, rules: List[List[int]]) -> int:
-    # result = 0
+    """Part 2. Convert the location number to a source number."""
     for destination, source, range_len in rules:
         if loc_num in range(destination, destination + range_len):
-            result = loc_num - (destination - source)
-            return result
+            return loc_num - (destination - source)
     return loc_num
+
+
+def mp_starter(seed_ranges: List[Tuple[int, int]], rules: Dict[str, List[List[int]]]) -> None:
+    """Part 2. Bruteforce w/ multiprocessing (takes around 4 hours to complete)"""
+    processes = []
+
+    for seed_range in seed_ranges:
+        process = Process(target=get_min_location_number_mp_p2, args=(seed_range, rules))
+        processes.append(process)
+
+    for process in processes:
+        process.start()
+
+    for process in processes:
+        process.join()
 
 
 def main() -> None:
@@ -183,7 +182,7 @@ def main() -> None:
     seeds = parse_seeds(data=task_input)
     seed_ranges = parse_seed_ranges_p2(seeds=seeds)
 
-    print(get_seed_number_from_location(seed_ranges=seed_ranges, rules=rules))
+    print(get_lowest_location_num_inverse(seed_ranges=seed_ranges, rules=rules))
 
 
 if __name__ == "__main__":
