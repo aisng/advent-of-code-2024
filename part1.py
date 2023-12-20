@@ -70,7 +70,7 @@ def get_starting_pos(matrix: Matrix) -> Tuple[int, int]:
         for col in range(len(matrix[row])):
             if matrix[row][col] == start_symbol:
                 return row, col
-    return 0, 0
+    return -1, -1
 
 
 def get_direction(curr_row: int,
@@ -101,13 +101,19 @@ def main() -> None:
     matrix = convert_data_to_matrix(data=full_input)
     curr_row, curr_col = get_starting_pos(matrix)
 
+    if any([item < 0 for item in (curr_col, curr_row)]):
+        raise Exception("aaa")
+
     distance = 0
     backward_dir = None
 
     while True:
 
         next_dir = get_direction(
-            curr_row=curr_row, curr_col=curr_col, matrix=matrix, backward_dir=backward_dir,
+            curr_row=curr_row,
+            curr_col=curr_col,
+            matrix=matrix,
+            backward_dir=backward_dir,
         )
 
         if not next_dir:
