@@ -24,6 +24,16 @@ L|7||
 -L-S|
 L|-JF"""
 
+sample_input = """...........
+.S-------7.
+.|F-----7|.
+.||.....||.
+.||.....||.
+.|L-7.F-J|.
+.|..|.|..|.
+.L--J.L--J.
+..........."""
+
 # custom data types
 Matrix = List[List[str]]
 
@@ -76,7 +86,7 @@ def get_starting_pos(matrix: Matrix) -> Tuple[int, int]:
 def get_direction(curr_row: int,
                   curr_col: int,
                   matrix: Matrix,
-                  backward_dir,
+                  backwards_dir: Optional[Tuple[int, int]],
                   ) -> Optional[Tuple[int, int]]:
 
     curr_symbol = matrix[curr_row][curr_col]
@@ -84,7 +94,7 @@ def get_direction(curr_row: int,
         step_row, step_col = direction
         next_row, next_col = curr_row + step_row, curr_col + step_col
 
-        if next_row not in range(len(matrix[0])) or next_col not in range(len(matrix)):
+        if next_row not in range(len(matrix)) or next_col not in range(len(matrix[0])):
             continue
 
         next_symbol = matrix[next_row][next_col]
@@ -93,7 +103,7 @@ def get_direction(curr_row: int,
 
         next_symbol_dirs = ACCEPTED_DIRECTIONS[next_symbol]
         curr_symbol_dirs = GUIDING_DIRECTIONS[curr_symbol]
-        if direction in next_symbol_dirs and direction in curr_symbol_dirs and direction != backward_dir:
+        if direction in next_symbol_dirs and direction in curr_symbol_dirs and direction != backwards_dir:
             return direction
 
 
@@ -105,7 +115,7 @@ def main() -> None:
         raise Exception("aaa")
 
     distance = 0
-    backward_dir = None
+    backwards_dir = None
 
     while True:
 
@@ -113,15 +123,15 @@ def main() -> None:
             curr_row=curr_row,
             curr_col=curr_col,
             matrix=matrix,
-            backward_dir=backward_dir,
+            backwards_dir=backwards_dir,
         )
 
         if not next_dir:
             raise Exception("aaa")
 
-        row_dir,  col_dir = next_dir
+        row_dir, col_dir = next_dir
 
-        backward_dir = (- row_dir, - col_dir)
+        backwards_dir = (-row_dir, -col_dir)
         curr_row += row_dir
         curr_col += col_dir
 
