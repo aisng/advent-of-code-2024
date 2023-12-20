@@ -1,0 +1,1 @@
+"""XXXXXXXXXXXS------7XX|F----7|XX||....||XX||....||XX|L-7F-J|XX|..||..|XXL--JL--JXXXXXXXXXXX"""

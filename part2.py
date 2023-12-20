@@ -1,7 +1,7 @@
 from typing import List
 from pprint import pprint
 from part1 import convert_data_to_matrix, get_direction, get_starting_pos
-
+from task_input import full_input
 sample_input = """...........
 .S-------7.
 .|F-----7|.
@@ -23,6 +23,16 @@ L--J.L7...LJS7F-7L7.
 ....FJL-7.||.||||...
 ....L---J.LJ.LJLJ..."""
 
+sample_input3 = """..........
+.S------7.
+.|F----7|.
+.||....||.
+.||....||.
+.|L-7F-J|.
+.|..||..|.
+.L--JL--J.
+.........."""
+
 # direction mappings
 
 NORTH = (-1, 0)
@@ -40,59 +50,45 @@ WEST = (0, -1)
 #     "S": [NORTH, SOUTH, EAST, WEST],
 # }
 
-
+bound_chars = "|-LJ7FS"
 Matrix = List[List[str]]
+matrix = convert_data_to_matrix(data=sample_input3)
+
+
+def flood(row: int, col: int) -> None:
+    if row not in range(len(matrix)) or col not in range(len(matrix[0])):
+        return
+
+    if matrix[row][col] in bound_chars:
+        return
+
+    if matrix[row][col] == "X":
+        return
+
+    matrix[row][col] = "X"
+
+    flood(row + 1, col)
+    flood(row - 1, col)
+    flood(row, col + 1)
+    flood(row, col - 1)
 
 
 def main() -> None:
-    matrix = convert_data_to_matrix(data=sample_input)
-    curr_row, curr_col = get_starting_pos(matrix)
 
-    if any([item < 0 for item in (curr_col, curr_row)]):
-        raise Exception("aaa")
+    pprint(matrix, width=200)
+    flood(0, 0)
+    pprint(matrix, width=200)
 
-    backwards_dir = None
+    counter = 0
+    for row in range(len(matrix)):
+        for col in range(len(matrix[row])):
+            if matrix[row][col] == ".":
+                counter += 1
 
-    while True:
+    print(counter)
 
-        next_dir = get_direction(
-            curr_row=curr_row,
-            curr_col=curr_col,
-            matrix=matrix,
-            backwards_dir=backwards_dir,
-        )
-
-        if not next_dir:
-            raise Exception("aaa")
-
-        row_dir, col_dir = next_dir
-
-        backwards_dir = (-row_dir, -col_dir)
-
-        if backwards_dir == NORTH and matrix[curr_row + WEST[0]][curr_col + WEST[1]] not in "S|-FJL":
-            matrix[curr_row + WEST[0]][curr_col + WEST[1]] = "X"
-        elif backwards_dir == SOUTH and matrix[curr_row + EAST[0]][curr_col + EAST[1]] not in "S|-FJL":
-            matrix[curr_row + EAST[0]][curr_col + EAST[1]] = "X"
-        elif backwards_dir == WEST and matrix[curr_row + SOUTH[0]][curr_col + SOUTH[1]] not in "S|-FJL":
-            matrix[curr_row + SOUTH[0]][curr_col + SOUTH[1]] = "X"
-        elif backwards_dir == EAST and matrix[curr_row + NORTH[0]][curr_col + NORTH[1]] not in "S|-FJL":
-            matrix[curr_row + NORTH[0]][curr_col + NORTH[1]] = "X"
-
-        curr_row += row_dir
-        curr_col += col_dir
-
-        if matrix[curr_row][curr_col] == "S":
-            if backwards_dir == NORTH and matrix[curr_row + WEST[0]][curr_col + WEST[1]] not in "S|-FJL":
-                matrix[curr_row + WEST[0]][curr_col + WEST[1]] = "X"
-            elif backwards_dir == SOUTH and matrix[curr_row + EAST[0]][curr_col + EAST[1]] not in "S|-FJL":
-                matrix[curr_row + EAST[0]][curr_col + EAST[1]] = "X"
-            elif backwards_dir == WEST and matrix[curr_row + SOUTH[0]][curr_col + SOUTH[1]] not in "S|-FJL":
-                matrix[curr_row + SOUTH[0]][curr_col + SOUTH[1]] = "X"
-            elif backwards_dir == EAST and matrix[curr_row + NORTH[0]][curr_col + NORTH[1]] not in "S|-FJL":
-                matrix[curr_row + NORTH[0]][curr_col + NORTH[1]] = "X"
-            break
-
-    pprint(matrix)
+    with open("output.py", "w") as f:
+        f.write(f'"""{"".join(y for x in matrix for y in x)}"""')
 
 
 if __name__ == "__main__":
