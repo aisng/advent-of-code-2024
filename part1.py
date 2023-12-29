@@ -34,6 +34,27 @@ sample_input = """...........
 .L--J.L--J.
 ..........."""
 
+sample_input3 = """..........
+.S------7.
+.|F----7|.
+.||....||.
+.||....||.
+.|L-7F-J|.
+.|..||..|.
+.L--JL--J.
+.........."""
+
+sample_input4 = """.F----7F7F7F7F-7....
+.|F--7||||||||FJ....
+.||.FJ||||||||L7....
+FJL7L7LJLJ||LJ.L-7..
+L--J.L7...LJS7F-7L7.
+....F-J..F7FJ|L7L7L7
+....L7.F7||L7|.L7L7|
+.....|FJLJ|FJ|F7|.LJ
+....FJL-7.||.||||...
+....L---J.LJ.LJLJ..."""
+
 # custom data types
 Matrix = List[List[str]]
 
@@ -107,15 +128,44 @@ def get_direction(curr_row: int,
             return direction
 
 
+def flood(row: int, col: int, matrix: Matrix) -> None:
+    bound_chars = "|-LJ7FS"
+
+    if row not in range(len(matrix)) or col not in range(len(matrix[0])):
+        return
+
+    if matrix[row][col] in bound_chars:
+        return
+
+    if matrix[row][col] == "X":
+        return
+
+    matrix[row][col] = "X"
+
+    flood(row + 1, col, matrix)
+    flood(row - 1, col, matrix)
+    flood(row, col + 1, matrix)
+    flood(row, col - 1, matrix)
+
+
+bound_chars = "|-LJ7FS"
+
+
 def main() -> None:
-    matrix = convert_data_to_matrix(data=full_input)
+    matrix = convert_data_to_matrix(data=sample_input4)
     curr_row, curr_col = get_starting_pos(matrix)
 
+    # flood(0, 0, matrix)
     if any([item < 0 for item in (curr_col, curr_row)]):
         raise Exception("aaa")
 
     distance = 0
     backwards_dir = None
+
+    # p2
+    loop_coords = {(curr_row, curr_col)}
+    counter = 0
+    cross_count = 0
 
     while True:
 
@@ -135,12 +185,36 @@ def main() -> None:
         curr_row += row_dir
         curr_col += col_dir
 
+        loop_coords.add((curr_row, curr_col))
+
         distance += 1
 
         if matrix[curr_row][curr_col] == "S":
             break
 
-    print(distance // 2)
+    for row in range(len(matrix)):
+        for col in range(len(matrix[row])):
+            if matrix[row][col] == ".":
+
+                row_to_check = matrix[row][col:]
+                for row_item in range(col, len(matrix[row])):
+
+                    if matrix[row][row_item] == ".":
+                        continue
+
+                    curr_char = matrix[row][row_item]
+
+                    if curr_char in bound_chars and (row, row_item) in loop_coords:
+                        cross_count += 1
+
+            if cross_count % 2 != 0:
+                counter += 1
+                cross_count = 0
+
+    print(distance)
+    print(len(loop_coords))
+    print(counter)
+    # pprint(matrix)
 
 
 if __name__ == "__main__":

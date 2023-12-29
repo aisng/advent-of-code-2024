@@ -52,7 +52,7 @@ WEST = (0, -1)
 
 bound_chars = "|-LJ7FS"
 Matrix = List[List[str]]
-matrix = convert_data_to_matrix(data=sample_input3)
+matrix = convert_data_to_matrix(data=sample_input2)
 
 
 def flood(row: int, col: int) -> None:
@@ -76,20 +76,33 @@ def flood(row: int, col: int) -> None:
 def main() -> None:
 
     pprint(matrix, width=200)
-    flood(0, 0)
-    pprint(matrix, width=200)
+    print()
+    # flood(0, 0)
 
     counter = 0
+    cross_count = 0
+    sub_m = None
     for row in range(len(matrix)):
         for col in range(len(matrix[row])):
             if matrix[row][col] == ".":
-                counter += 1
+                # flood(row, col)
+
+                sub_m = matrix[row][:col-1]
+
+    if sub_m:
+        for item in sub_m:
+            if item in bound_chars:
+                cross_count += 1
+                if cross_count % 2 != 0:
+                    counter += 1
 
     print(counter)
+    pprint(matrix, width=200)
 
-    with open("output.py", "w") as f:
-        f.write(f'"""{"".join(y for x in matrix for y in x)}"""')
+    with open("output.py", "r+") as f:
+        f.writelines(f'"""{"".join(y for x in matrix for y in x)}"""')
 
 
 if __name__ == "__main__":
+    # 289 too low
     main()
