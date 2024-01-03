@@ -152,7 +152,7 @@ bound_chars = "|-LJ7FS"
 
 
 def main() -> None:
-    matrix = convert_data_to_matrix(data=sample_input4)
+    matrix = convert_data_to_matrix(data=full_input)
     curr_row, curr_col = get_starting_pos(matrix)
 
     # flood(0, 0, matrix)
@@ -196,25 +196,32 @@ def main() -> None:
         for col in range(len(matrix[row])):
             if matrix[row][col] == ".":
 
-                row_to_check = matrix[row][col:]
-                for row_item in range(col, len(matrix[row])):
+                row_to_check = matrix[row][col + 1:]
+                # print(f"row {row}, col {col}", row_to_check)
 
-                    if matrix[row][row_item] == ".":
+                # for row_item in range(col, len(matrix[row])):
+                for idx, row_item in enumerate(row_to_check, start=col + 1):
+                    new_col = idx
+                    # curr_char = matrix[row][row_item]
+                    if row_item == ".":
                         continue
 
-                    curr_char = matrix[row][row_item]
-
-                    if curr_char in bound_chars and (row, row_item) in loop_coords:
+                    if row_item in bound_chars and (row, idx) in loop_coords:
                         cross_count += 1
+                        # print(
+                        #     f"row {row}, col {col} {row_to_check} \n idx {idx}, row_item {row_item} CC {cross_count}")
+                        # print(matrix[row][idx])
 
-            if cross_count % 2 != 0:
-                counter += 1
-                cross_count = 0
+            # print(matrix[row][col], matrix[row][new_col])
+        if cross_count % 2 != 0:
+
+            counter += 1
+        cross_count = 0
 
     print(distance)
     print(len(loop_coords))
     print(counter)
-    # pprint(matrix)
+    # pprint(matrix, width=300)
 
 
 if __name__ == "__main__":
