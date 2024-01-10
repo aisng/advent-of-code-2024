@@ -55,6 +55,17 @@ L--J.L7...LJS7F-7L7.
 ....FJL-7.||.||||...
 ....L---J.LJ.LJLJ..."""
 
+si = """FF7FSF7F7F7F7F7F---7
+L|LJ||||||||||||F--J
+FL-7LJLJ||||||LJL-77
+F--JF--7||LJLJ7F7FJ-
+L---JF-JLJ.||-FJLJJ7
+|F|F-JF---7F7-L7L|7|
+|FFJF7L7F-JF7|JL---7
+7-L-JL7||F7|L7F-7F7|
+L.L7LFJ|||||FJL7||LJ
+L7JLJL-JLJLJL--JLJ.L"""
+
 # custom data types
 Matrix = List[List[str]]
 
@@ -128,6 +139,35 @@ def get_direction(curr_row: int,
             return direction
 
 
+def get_start_pipe(coords: Tuple[int, int], matrix: Matrix) -> str:
+
+    row, col = coords
+    curr_symbol = matrix[row][col]
+    directions = []
+    result = ""
+
+    for direction in (NORTH, SOUTH, EAST, WEST):
+        step_row, step_col = direction
+        next_row, next_col = row + step_row, col + step_col
+
+        if next_row not in range(len(matrix)) or next_col not in range(len(matrix[0])):
+            continue
+
+        next_symbol = matrix[next_row][next_col]
+        if next_symbol not in ACCEPTED_DIRECTIONS:
+            continue
+
+        next_symbol_dirs = ACCEPTED_DIRECTIONS[next_symbol]
+        curr_symbol_dirs = GUIDING_DIRECTIONS[curr_symbol]
+        if direction in next_symbol_dirs and direction in curr_symbol_dirs and direction:
+            directions.append(direction)
+
+    for symbol, guiding_dir in GUIDING_DIRECTIONS.items():
+        if directions == guiding_dir:
+            result = symbol
+    return result
+
+
 def flood(row: int, col: int, matrix: Matrix) -> None:
     bound_chars = "|-LJ7FS"
 
@@ -149,12 +189,16 @@ def flood(row: int, col: int, matrix: Matrix) -> None:
 
 
 bound_chars = "|-LJ7FS"
+loop_south_chars = "7F|"
 
 
 def main() -> None:
     matrix = convert_data_to_matrix(data=full_input)
-    curr_row, curr_col = get_starting_pos(matrix)
+    start_pos = get_starting_pos(matrix)
 
+    start_pipe = get_start_pipe(coords=start_pos, matrix=matrix)
+    print(start_pipe)
+    curr_row, curr_col = start_pos
     # flood(0, 0, matrix)
     if any([item < 0 for item in (curr_col, curr_row)]):
         raise Exception("aaa")
@@ -164,8 +208,6 @@ def main() -> None:
 
     # p2
     loop_coords = {(curr_row, curr_col)}
-    counter = 0
-    cross_count = 0
 
     while True:
 
@@ -192,37 +234,33 @@ def main() -> None:
         if matrix[curr_row][curr_col] == "S":
             break
 
+    counter = 0
+
     for row in range(len(matrix)):
         for col in range(len(matrix[row])):
-            if matrix[row][col] == ".":
+            if (row, col) not in loop_coords:
+                cross_counter = 0
+                for row_item_idx in range(col, len(matrix[row])):
+                    current_char = matrix[row][row_item_idx]
 
-                row_to_check = matrix[row][col + 1:]
-                # print(f"row {row}, col {col}", row_to_check)
+            # if matrix[row][col] == ".":
+            #     cross_counter = 0
 
-                # for row_item in range(col, len(matrix[row])):
-                for idx, row_item in enumerate(row_to_check, start=col + 1):
-                    new_col = idx
-                    # curr_char = matrix[row][row_item]
-                    if row_item == ".":
-                        continue
+            #     for row_item_idx in range(col, len(matrix[row])):
+            #         current_char = matrix[row][row_item_idx]
 
-                    if row_item in bound_chars and (row, idx) in loop_coords:
-                        cross_count += 1
-                        # print(
-                        #     f"row {row}, col {col} {row_to_check} \n idx {idx}, row_item {row_item} CC {cross_count}")
-                        # print(matrix[row][idx])
+                    if current_char in bound_chars and (row, row_item_idx) in loop_coords:
+                        if current_char == "S":
+                            current_char = start_pipe
 
-            # print(matrix[row][col], matrix[row][new_col])
-        if cross_count % 2 != 0:
+                        if current_char in loop_south_chars:
+                            cross_counter += 1
 
-            counter += 1
-        cross_count = 0
+                if cross_counter % 2 != 0:
+                    counter += 1
 
-    print(distance)
-    print(len(loop_coords))
-    print(counter)
-    # pprint(matrix, width=300)
+    print("res", counter)
 
 
 if __name__ == "__main__":
-    main()
+    main()  # 246

@@ -2,3 +2,5 @@
 /.venv/
 **/.idea/
 **/__pycache__
+anything.py
+tst.py
