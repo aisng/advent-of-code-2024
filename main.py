@@ -1,76 +1,11 @@
 from typing import List, Optional, Tuple
-from pprint import pprint
 from task_input import full_input
 
-sample_data = """.....
-.S-7.
-.|.|.
-.L-J.
-....."""
-
-sample_data_2 = """..F7.
-.FJ|.
-SJ.L7
-|F--J
-LJ..."""
-sample_data_3 = """-L|F7
-7S-7|
-L|7||
--L-J|
-L|-JF"""
-sample_data_3_edit = """-L|F7
-7F-7|
-L|7||
--L-S|
-L|-JF"""
-
-sample_input = """...........
-.S-------7.
-.|F-----7|.
-.||.....||.
-.||.....||.
-.|L-7.F-J|.
-.|..|.|..|.
-.L--J.L--J.
-..........."""
-
-sample_input3 = """..........
-.S------7.
-.|F----7|.
-.||....||.
-.||....||.
-.|L-7F-J|.
-.|..||..|.
-.L--JL--J.
-.........."""
-
-sample_input4 = """.F----7F7F7F7F-7....
-.|F--7||||||||FJ....
-.||.FJ||||||||L7....
-FJL7L7LJLJ||LJ.L-7..
-L--J.L7...LJS7F-7L7.
-....F-J..F7FJ|L7L7L7
-....L7.F7||L7|.L7L7|
-.....|FJLJ|FJ|F7|.LJ
-....FJL-7.||.||||...
-....L---J.LJ.LJLJ..."""
-
-si = """FF7FSF7F7F7F7F7F---7
-L|LJ||||||||||||F--J
-FL-7LJLJ||||||LJL-77
-F--JF--7||LJLJ7F7FJ-
-L---JF-JLJ.||-FJLJJ7
-|F|F-JF---7F7-L7L|7|
-|FFJF7L7F-JF7|JL---7
-7-L-JL7||F7|L7F-7F7|
-L.L7LFJ|||||FJL7||LJ
-L7JLJL-JLJLJL--JLJ.L"""
 
 # custom data types
 Matrix = List[List[str]]
 
 # movement mappings
-
 NORTH = (-1, 0)
 SOUTH = (1, 0)
 EAST = (0, 1)
@@ -139,7 +74,9 @@ def get_direction(curr_row: int,
             return direction
 
 
-def get_start_pipe(coords: Tuple[int, int], matrix: Matrix) -> str:
+def get_start_pipe(coords: Tuple[int, int],
+                   matrix: Matrix
+                   ) -> str:
 
     row, col = coords
     curr_symbol = matrix[row][col]
@@ -168,26 +105,6 @@ def get_start_pipe(coords: Tuple[int, int], matrix: Matrix) -> str:
     return result
 
 
-def flood(row: int, col: int, matrix: Matrix) -> None:
-    bound_chars = "|-LJ7FS"
-
-    if row not in range(len(matrix)) or col not in range(len(matrix[0])):
-        return
-
-    if matrix[row][col] in bound_chars:
-        return
-
-    if matrix[row][col] == "X":
-        return
-
-    matrix[row][col] = "X"
-
-    flood(row + 1, col, matrix)
-    flood(row - 1, col, matrix)
-    flood(row, col + 1, matrix)
-    flood(row, col - 1, matrix)
-
-
 bound_chars = "|-LJ7FS"
 loop_south_chars = "7F|"
 
@@ -200,14 +117,14 @@ def main() -> None:
     curr_row, curr_col = start_pos
 
     if any([item < 0 for item in (curr_col, curr_row)]):
-        raise Exception("aaa")
+        raise Exception("out of matrix bounds")
 
     distance = 0
     backwards_dir = None
 
-    # p2
     loop_coords = {(curr_row, curr_col)}
 
+    # pt1
     while True:
 
         next_dir = get_direction(
@@ -218,7 +135,7 @@ def main() -> None:
         )
 
         if not next_dir:
-            raise Exception("aaa")
+            raise Exception("next dir not found")
 
         row_dir, col_dir = next_dir
 
@@ -233,12 +150,15 @@ def main() -> None:
         if matrix[curr_row][curr_col] == "S":
             break
 
-    counter = 0
+    # pt2
+    tiles_within_counter = 0
 
     for row in range(len(matrix)):
         for col in range(len(matrix[row])):
+
             if (row, col) not in loop_coords:
                 cross_counter = 0
+
                 for row_item_idx in range(col, len(matrix[row])):
                     current_char = matrix[row][row_item_idx]
 
@@ -250,10 +170,13 @@ def main() -> None:
                             cross_counter += 1
 
                 if cross_counter % 2 != 0:
-                    counter += 1
+                    tiles_within_counter += 1
 
-    print("res", counter)
+    print("pt1", distance // 2)
+    print("pt2", tiles_within_counter)
 
 
 if __name__ == "__main__":
-    main()  # 501
+    # pt1 6856
+    # pt2 501
+    main()
