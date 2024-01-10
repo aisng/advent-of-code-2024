@@ -195,11 +195,10 @@ loop_south_chars = "7F|"
 def main() -> None:
     matrix = convert_data_to_matrix(data=full_input)
     start_pos = get_starting_pos(matrix)
-
     start_pipe = get_start_pipe(coords=start_pos, matrix=matrix)
-    print(start_pipe)
+
     curr_row, curr_col = start_pos
-    # flood(0, 0, matrix)
+
     if any([item < 0 for item in (curr_col, curr_row)]):
         raise Exception("aaa")
 
@@ -243,12 +242,6 @@ def main() -> None:
                 for row_item_idx in range(col, len(matrix[row])):
                     current_char = matrix[row][row_item_idx]
 
-            # if matrix[row][col] == ".":
-            #     cross_counter = 0
-
-            #     for row_item_idx in range(col, len(matrix[row])):
-            #         current_char = matrix[row][row_item_idx]
-
                     if current_char in bound_chars and (row, row_item_idx) in loop_coords:
                         if current_char == "S":
                             current_char = start_pipe
@@ -263,4 +256,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()  # 246
+    main()  # 501
