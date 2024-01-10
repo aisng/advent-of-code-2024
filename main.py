@@ -148,6 +148,7 @@ def main() -> None:
         distance += 1
 
         if matrix[curr_row][curr_col] == "S":
+            distance //= 2
             break
 
     # pt2
@@ -162,7 +163,7 @@ def main() -> None:
                 for row_item_idx in range(col, len(matrix[row])):
                     current_char = matrix[row][row_item_idx]
 
-                    if current_char in bound_chars and (row, row_item_idx) in loop_coords:
+                    if (row, row_item_idx) in loop_coords:
                         if current_char == "S":
                             current_char = start_pipe
 
@@ -172,7 +173,7 @@ def main() -> None:
                 if cross_counter % 2 != 0:
                     tiles_within_counter += 1
 
-    print("pt1", distance // 2)
+    print("pt1", distance)
     print("pt2", tiles_within_counter)
 
 
