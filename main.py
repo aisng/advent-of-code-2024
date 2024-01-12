@@ -105,6 +105,7 @@ def get_start_pipe(coords: Tuple[int, int],
     return result
 
 
+# test
 bound_chars = "|-LJ7FS"
 loop_south_chars = "7F|"
 
