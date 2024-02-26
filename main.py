@@ -1,5 +1,4 @@
 from typing import List, Optional, Tuple
-from task_input import full_input
 
 
 # custom data types
@@ -32,11 +31,14 @@ GUIDING_DIRECTIONS = {
     "S": [NORTH, SOUTH, EAST, WEST],
 }
 
+with open("task_input.txt", "r", encoding="utf-8") as f:
+    task_input = [line.strip() for line in f.readlines()]
+
 
 def convert_data_to_matrix(data: str) -> Matrix:
     """Convert the input string to a matrix."""
     result = []
-    for line in data.splitlines():
+    for line in data:
         result.append(list(line))
     return result
 
@@ -111,7 +113,7 @@ loop_south_chars = "7F|"
 
 
 def main() -> None:
-    matrix = convert_data_to_matrix(data=full_input)
+    matrix = convert_data_to_matrix(data=task_input)
     start_pos = get_starting_pos(matrix)
     start_pipe = get_start_pipe(coords=start_pos, matrix=matrix)
 
