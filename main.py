@@ -1,6 +1,6 @@
 from typing import List, Iterable
 
-with open("data_full.txt", "r", encoding="utf-8") as f:
+with open("data.txt", "r", encoding="utf-8") as f:
     data_full = [line.strip() for line in f.readlines()]
 
 
